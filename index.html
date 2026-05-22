@@ -51,208 +51,110 @@
   .archive-item{background:#fdf7fb;border-radius:14px;padding:13px 14px;margin-bottom:8px;border:0.5px solid #f0c0da;display:flex;justify-content:space-between;align-items:center}
   .archive-date{font-size:14px;font-weight:600;color:#7a3a5a}
   .archive-meta{font-size:12px;color:#c06090;margin-top:2px}
-  .setup-box{background:#fff3f8;border:1px solid #f0c0da;border-radius:14px;padding:18px;margin:16px}
-  .setup-box h2{font-size:16px;font-weight:600;color:#c2185b;margin-bottom:8px}
-  .setup-box p{font-size:13px;color:#7a3a5a;margin-bottom:12px;line-height:1.5}
-  .setup-box input{width:100%;padding:10px 12px;border:0.5px solid #f0c0da;border-radius:10px;font-size:14px;background:#fff;color:#1c1c1e;outline:none;margin-bottom:10px}
-  .loading{text-align:center;padding:30px;color:#c06090;font-size:14px}
-  .sync-indicator{font-size:11px;color:#c06090;text-align:center;padding:4px 0 8px;opacity:0;transition:opacity 0.3s}
-  .sync-indicator.show{opacity:1}
+  .sync{text-align:center;font-size:12px;color:#c06090;padding:4px 0 8px;min-height:20px}
 </style>
 </head>
 <body>
 
-<!-- SETUP (wird ausgeblendet nach Eingabe) -->
-<div id="setup-screen">
-  <div class="header">
-    <h1>🐾 DogWalk Tracker</h1>
-    <p>Einmalige Einrichtung</p>
+<div class="header">
+  <h1>🐾 DogWalk Tracker</h1>
+  <p>Jonna &amp; Theda</p>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('erfassen')">Erfassen</button>
+  <button class="tab" onclick="switchTab('offen')">Offen</button>
+  <button class="tab" onclick="switchTab('archiv')">Archiv</button>
+</div>
+
+<div class="sync" id="sync"></div>
+
+<div id="tab-erfassen" class="section active">
+  <div class="stats">
+    <div class="stat"><div class="stat-num" id="stat-offen">–</div><div class="stat-label">Offen</div></div>
+    <div class="stat"><div class="stat-num" id="stat-archiv">–</div><div class="stat-label">Archiviert</div></div>
   </div>
-  <div class="setup-box">
-    <h2>API-Key eingeben</h2>
-    <p>Gehe auf <strong>jsonbin.io</strong>, registriere dich kostenlos und erstelle einen API-Key. Füge ihn hier ein – nur einmalig nötig!</p>
-    <input type="text" id="api-key-input" placeholder="$2b$10$... (dein JSONBin API Key)">
-    <button class="btn btn-primary" onclick="setupApp()">Speichern & App starten</button>
+  <div class="card">
+    <div class="card-title">Neuer Spaziergang</div>
+    <div class="form-group">
+      <label>Person</label>
+      <select id="person"><option value="A">Jonna</option><option value="B">Theda</option></select>
+    </div>
+    <div class="form-group">
+      <label>Datum</label>
+      <input type="date" id="datum">
+    </div>
+    <div class="form-group">
+      <label>Notiz (optional)</label>
+      <input type="text" id="notiz" placeholder="z.B. 2 Runden im Park">
+    </div>
+    <button class="btn btn-primary" onclick="addWalk()">+ Spaziergang hinzufügen</button>
   </div>
 </div>
 
-<!-- HAUPT-APP (versteckt bis Setup fertig) -->
-<div id="main-app" style="display:none">
-  <div class="header">
-    <h1>🐾 DogWalk Tracker</h1>
-    <p>Jonna &amp; Theda</p>
+<div id="tab-offen" class="section">
+  <div class="filter-row">
+    <button class="filter-btn active" id="f-all" onclick="setFilter('all')">Alle</button>
+    <button class="filter-btn" id="f-A" onclick="setFilter('A')">Jonna</button>
+    <button class="filter-btn" id="f-B" onclick="setFilter('B')">Theda</button>
   </div>
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('erfassen')">Erfassen</button>
-    <button class="tab" onclick="switchTab('offen')">Offen</button>
-    <button class="tab" onclick="switchTab('archiv')">Archiv</button>
-  </div>
-  <div class="sync-indicator" id="sync-indicator">Wird gespeichert …</div>
-
-  <div id="tab-erfassen" class="section active">
-    <div class="stats">
-      <div class="stat"><div class="stat-num" id="stat-offen">0</div><div class="stat-label">Offen</div></div>
-      <div class="stat"><div class="stat-num" id="stat-archiv">0</div><div class="stat-label">Archiviert</div></div>
-    </div>
-    <div class="card">
-      <div class="card-title">Neuer Spaziergang</div>
-      <div class="form-group">
-        <label>Person</label>
-        <select id="person"><option value="A">Jonna</option><option value="B">Theda</option></select>
-      </div>
-      <div class="form-group">
-        <label>Datum</label>
-        <input type="date" id="datum">
-      </div>
-      <div class="form-group">
-        <label>Notiz (optional)</label>
-        <input type="text" id="notiz" placeholder="z.B. 2 Runden im Park">
-      </div>
-      <button class="btn btn-primary" onclick="addWalk()">+ Spaziergang hinzufügen</button>
-    </div>
-  </div>
-
-  <div id="tab-offen" class="section">
-    <div class="filter-row">
-      <button class="filter-btn active" id="f-all" onclick="setFilter('all')">Alle</button>
-      <button class="filter-btn" id="f-A" onclick="setFilter('A')">Jonna</button>
-      <button class="filter-btn" id="f-B" onclick="setFilter('B')">Theda</button>
-    </div>
-    <div id="walk-list"></div>
-  </div>
-
-  <div id="tab-archiv" class="section">
-    <div class="filter-row">
-      <button class="filter-btn active" id="af-all" onclick="setArchivFilter('all')">Alle</button>
-      <button class="filter-btn" id="af-A" onclick="setArchivFilter('A')">Jonna</button>
-      <button class="filter-btn" id="af-B" onclick="setArchivFilter('B')">Theda</button>
-    </div>
-    <div id="archiv-list"></div>
-  </div>
+  <div id="walk-list"></div>
 </div>
 
+<div id="tab-archiv" class="section">
+  <div class="filter-row">
+    <button class="filter-btn active" id="af-all" onclick="setArchivFilter('all')">Alle</button>
+    <button class="filter-btn" id="af-A" onclick="setArchivFilter('A')">Jonna</button>
+    <button class="filter-btn" id="af-B" onclick="setArchivFilter('B')">Theda</button>
+  </div>
+  <div id="archiv-list"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
 <script>
-  const STORAGE_KEY = 'dogwalk_apikey';
-  const BIN_KEY = 'dogwalk_binid';
-  let walks = [];
+  // GUN = dezentrale Echtzeit-Datenbank, kein Account nötig
+  const gun = GUN(['https://gun-manhattan.herokuapp.com/gun']);
+  const db = gun.get('dogwalk-jonna-theda-2024');
+
+  let walks = {};
   let filter = 'all';
   let archivFilter = 'all';
-  let API_KEY = '';
-  let BIN_ID = '';
-  let saveTimeout = null;
 
-  // Beim Start prüfen ob bereits eingerichtet
-  window.onload = function() {
-    document.getElementById('datum').value = new Date().toISOString().split('T')[0];
-    API_KEY = localStorage.getItem(STORAGE_KEY) || '';
-    BIN_ID = localStorage.getItem(BIN_KEY) || '';
-    if (API_KEY && BIN_ID) {
-      showApp();
-      loadData();
-    } else if (API_KEY) {
-      showApp();
-      createBin();
-    }
-  };
-
-  async function setupApp() {
-    const key = document.getElementById('api-key-input').value.trim();
-    if (!key) { alert('Bitte API-Key eingeben.'); return; }
-    API_KEY = key;
-    localStorage.setItem(STORAGE_KEY, key);
-    showApp();
-    await createBin();
-  }
-
-  function showApp() {
-    document.getElementById('setup-screen').style.display = 'none';
-    document.getElementById('main-app').style.display = 'block';
-  }
-
-  async function createBin() {
-    showLoading();
-    try {
-      const res = await fetch('https://api.jsonbin.io/v3/b', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY, 'X-Bin-Name': 'dogwalk', 'X-Bin-Private': 'false' },
-        body: JSON.stringify({ walks: [] })
-      });
-      const text = await res.text();
-      let data;
-      try { data = JSON.parse(text); } catch(e) { alert('Antwort konnte nicht gelesen werden:\n' + text); return; }
-      if (data.metadata && data.metadata.id) {
-        BIN_ID = data.metadata.id;
-        localStorage.setItem(BIN_KEY, BIN_ID);
-        walks = [];
-        render();
-      } else {
-        alert('JSONBin Fehler:\n' + JSON.stringify(data));
-      }
-    } catch(e) { alert('Verbindungsfehler: ' + e.message); }
-  }
-
-  async function loadData() {
-    showLoading();
-    try {
-      const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-        headers: { 'X-Master-Key': API_KEY }
-      });
-      const data = await res.json();
-      walks = data.record.walks || [];
-      render();
-    } catch(e) { showToast('Ladefehler – bitte neu laden'); }
-  }
-
-  async function saveData() {
-    showSync();
-    try {
-      await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
-        body: JSON.stringify({ walks })
-      });
-    } catch(e) { showToast('Speicherfehler!'); }
-    hideSync();
-  }
-
-  function scheduleSave() {
-    clearTimeout(saveTimeout);
-    saveTimeout = setTimeout(saveData, 500);
-  }
-
-  function showLoading() {
-    document.getElementById('walk-list').innerHTML = '<div class="loading">Lädt …</div>';
-    document.getElementById('archiv-list').innerHTML = '<div class="loading">Lädt …</div>';
-  }
-
-  function showSync() {
-    document.getElementById('sync-indicator').classList.add('show');
-  }
-  function hideSync() {
-    setTimeout(() => document.getElementById('sync-indicator').classList.remove('show'), 800);
-  }
+  document.getElementById('datum').value = new Date().toISOString().split('T')[0];
 
   function name(p) { return p === 'A' ? 'Jonna' : 'Theda'; }
+
+  // Daten live laden
+  setSync('Verbinde …');
+  db.map().on((data, id) => {
+    if (!data || id === '_') return;
+    if (data.deleted) {
+      delete walks[id];
+    } else {
+      walks[id] = data;
+    }
+    render();
+    setSync('');
+  });
 
   function addWalk() {
     const p = document.getElementById('person').value;
     const d = document.getElementById('datum').value;
     const n = document.getElementById('notiz').value.trim();
     if (!d) { alert('Bitte ein Datum wählen.'); return; }
-    walks.unshift({ id: Date.now(), person: p, datum: d, notiz: n, paid: false });
+    const id = 'w' + Date.now();
+    const entry = { id, person: p, datum: d, notiz: n, paid: false };
+    db.get(id).put(entry);
     document.getElementById('notiz').value = '';
-    render();
-    scheduleSave();
     showToast('Spaziergang eingetragen ✓');
   }
 
   function togglePaid(id) {
-    const w = walks.find(x => x.id === id);
+    const w = walks[id];
     if (!w) return;
-    w.paid = !w.paid;
-    render();
-    scheduleSave();
-    if (w.paid) showToast('Bezahlt – ins Archiv verschoben ✓');
+    const updated = Object.assign({}, w, { paid: !w.paid });
+    db.get(id).put(updated);
+    if (updated.paid) showToast('Bezahlt – ins Archiv verschoben ✓');
   }
 
   function formatDate(d) {
@@ -274,14 +176,19 @@
 
   function render() { renderStats(); renderWalks(); renderArchiv(); }
 
+  function getList() {
+    return Object.values(walks).filter(w => w && w.datum).sort((a,b) => b.datum.localeCompare(a.datum));
+  }
+
   function renderStats() {
-    document.getElementById('stat-offen').textContent = walks.filter(w => !w.paid).length;
-    document.getElementById('stat-archiv').textContent = walks.filter(w => w.paid).length;
+    const all = getList();
+    document.getElementById('stat-offen').textContent = all.filter(w => !w.paid).length;
+    document.getElementById('stat-archiv').textContent = all.filter(w => w.paid).length;
   }
 
   function renderWalks() {
     const list = document.getElementById('walk-list');
-    let data = walks.filter(w => !w.paid);
+    let data = getList().filter(w => !w.paid);
     if (filter !== 'all') data = data.filter(w => w.person === filter);
     if (!data.length) {
       list.innerHTML = `<div class="empty"><div class="empty-icon">🐕</div><p>Keine offenen Spaziergänge${filter !== 'all' ? ' für ' + name(filter) : ''}</p></div>`;
@@ -289,7 +196,7 @@
     }
     list.innerHTML = data.map(w => `
       <div class="walk-item">
-        <div class="checkbox ${w.paid ? 'checked' : ''}" onclick="togglePaid(${w.id})">
+        <div class="checkbox ${w.paid ? 'checked' : ''}" onclick="togglePaid('${w.id}')">
           <svg width="13" height="10" viewBox="0 0 13 10" fill="none"><path d="M1 5l4 4L12 1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
         <div class="walk-info">
@@ -303,7 +210,7 @@
 
   function renderArchiv() {
     const list = document.getElementById('archiv-list');
-    let data = walks.filter(w => w.paid);
+    let data = getList().filter(w => w.paid);
     if (archivFilter !== 'all') data = data.filter(w => w.person === archivFilter);
     if (!data.length) {
       list.innerHTML = `<div class="empty"><div class="empty-icon">📦</div><p>Noch nichts im Archiv${archivFilter !== 'all' ? ' für ' + name(archivFilter) : ''}</p></div>`;
@@ -326,7 +233,10 @@
     });
     document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
     document.getElementById('tab-' + t).classList.add('active');
-    if (t === 'offen' || t === 'archiv') loadData();
+  }
+
+  function setSync(msg) {
+    document.getElementById('sync').textContent = msg;
   }
 
   function showToast(msg) {
