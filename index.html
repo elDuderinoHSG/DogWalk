@@ -27,11 +27,12 @@
   .form-group label{display:block;font-size:12px;color:#c06090;margin-bottom:5px;font-weight:500}
   .form-group input,.form-group select{width:100%;padding:10px 12px;border:0.5px solid #f0c0da;border-radius:10px;font-size:15px;background:#fdf7fb;color:#1c1c1e;appearance:none;-webkit-appearance:none;outline:none}
   .form-group input:focus,.form-group select:focus{border-color:#c2185b;background:#fff}
-  .btn{width:100%;padding:13px;border-radius:12px;border:none;font-size:16px;font-weight:600;cursor:pointer;transition:opacity 0.2s,transform 0.1s}
+  .btn{width:100%;padding:13px;border-radius:12px;border:none;font-size:16px;font-weight:600;cursor:pointer;transition:opacity 0.2s,transform 0.1s;margin-bottom:8px}
   .btn:active{transform:scale(0.98)}
   .btn-primary{background:linear-gradient(135deg,#e0589e,#c2185b);color:#fff}
+  .btn-secondary{background:#fff;color:#c2185b;border:1.5px solid #f0c0da}
   .walk-item{background:#fff;border-radius:14px;padding:14px;margin-bottom:10px;border:0.5px solid #f0c0da;display:flex;align-items:center;gap:12px}
-  .checkbox{width:24px;height:24px;border-radius:50%;border:2px solid #f0c0da;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.2s;background:#fff}
+  .checkbox{width:26px;height:26px;border-radius:50%;border:2px solid #f0c0da;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.2s;background:#fff}
   .checkbox.checked{background:#c2185b;border-color:#c2185b}
   .checkbox svg{display:none}
   .checkbox.checked svg{display:block}
@@ -51,110 +52,120 @@
   .archive-item{background:#fdf7fb;border-radius:14px;padding:13px 14px;margin-bottom:8px;border:0.5px solid #f0c0da;display:flex;justify-content:space-between;align-items:center}
   .archive-date{font-size:14px;font-weight:600;color:#7a3a5a}
   .archive-meta{font-size:12px;color:#c06090;margin-top:2px}
-  .sync{text-align:center;font-size:12px;color:#c06090;padding:4px 0 8px;min-height:20px}
+  .info-box{background:#fff3f8;border:1px solid #f0c0da;border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:13px;color:#7a3a5a;line-height:1.5}
 </style>
 </head>
 <body>
 
 <div class="header">
   <h1>🐾 DogWalk Tracker</h1>
-  <p>Jonna &amp; Theda</p>
+  <p id="person-name">Lade …</p>
 </div>
 
-<div class="tabs">
-  <button class="tab active" onclick="switchTab('erfassen')">Erfassen</button>
-  <button class="tab" onclick="switchTab('offen')">Offen</button>
-  <button class="tab" onclick="switchTab('archiv')">Archiv</button>
-</div>
-
-<div class="sync" id="sync"></div>
-
-<div id="tab-erfassen" class="section active">
-  <div class="stats">
-    <div class="stat"><div class="stat-num" id="stat-offen">–</div><div class="stat-label">Offen</div></div>
-    <div class="stat"><div class="stat-num" id="stat-archiv">–</div><div class="stat-label">Archiviert</div></div>
+<!-- PERSONEN-AUSWAHL -->
+<div id="screen-person" style="padding:24px 16px;display:block">
+  <div style="text-align:center;margin-bottom:24px">
+    <div style="font-size:48px;margin-bottom:12px">🐕</div>
+    <div style="font-size:18px;font-weight:600;color:#c2185b;margin-bottom:6px">Wer bist du?</div>
+    <div style="font-size:14px;color:#c06090">Wähle deinen Namen um zu starten</div>
   </div>
-  <div class="card">
-    <div class="card-title">Neuer Spaziergang</div>
-    <div class="form-group">
-      <label>Person</label>
-      <select id="person"><option value="A">Jonna</option><option value="B">Theda</option></select>
+  <button class="btn btn-primary" style="margin-bottom:12px" onclick="selectPerson('A')">🌸 Ich bin Jonna</button>
+  <button class="btn btn-primary" onclick="selectPerson('B')">🌸 Ich bin Theda</button>
+</div>
+
+<!-- HAUPT-APP -->
+<div id="screen-app" style="display:none">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('erfassen')">Erfassen</button>
+    <button class="tab" onclick="switchTab('offen')">Offen</button>
+    <button class="tab" onclick="switchTab('archiv')">Archiv</button>
+  </div>
+
+  <div id="tab-erfassen" class="section active">
+    <div class="stats">
+      <div class="stat"><div class="stat-num" id="stat-offen">0</div><div class="stat-label">Offen</div></div>
+      <div class="stat"><div class="stat-num" id="stat-archiv">0</div><div class="stat-label">Archiviert</div></div>
     </div>
-    <div class="form-group">
-      <label>Datum</label>
-      <input type="date" id="datum">
+    <div class="card">
+      <div class="card-title">Neuer Spaziergang</div>
+      <div class="form-group">
+        <label>Datum</label>
+        <input type="date" id="datum">
+      </div>
+      <div class="form-group">
+        <label>Notiz (optional)</label>
+        <input type="text" id="notiz" placeholder="z.B. 2 Runden im Park">
+      </div>
+      <button class="btn btn-primary" onclick="addWalk()">+ Spaziergang hinzufügen</button>
     </div>
-    <div class="form-group">
-      <label>Notiz (optional)</label>
-      <input type="text" id="notiz" placeholder="z.B. 2 Runden im Park">
-    </div>
-    <button class="btn btn-primary" onclick="addWalk()">+ Spaziergang hinzufügen</button>
+    <button class="btn btn-secondary" onclick="switchPerson()">👤 Person wechseln</button>
+  </div>
+
+  <div id="tab-offen" class="section">
+    <div class="info-box">✅ Kreis antippen = als bezahlt markieren → wandert ins Archiv</div>
+    <div id="walk-list"></div>
+  </div>
+
+  <div id="tab-archiv" class="section">
+    <div id="archiv-list"></div>
   </div>
 </div>
 
-<div id="tab-offen" class="section">
-  <div class="filter-row">
-    <button class="filter-btn active" id="f-all" onclick="setFilter('all')">Alle</button>
-    <button class="filter-btn" id="f-A" onclick="setFilter('A')">Jonna</button>
-    <button class="filter-btn" id="f-B" onclick="setFilter('B')">Theda</button>
-  </div>
-  <div id="walk-list"></div>
-</div>
-
-<div id="tab-archiv" class="section">
-  <div class="filter-row">
-    <button class="filter-btn active" id="af-all" onclick="setArchivFilter('all')">Alle</button>
-    <button class="filter-btn" id="af-A" onclick="setArchivFilter('A')">Jonna</button>
-    <button class="filter-btn" id="af-B" onclick="setArchivFilter('B')">Theda</button>
-  </div>
-  <div id="archiv-list"></div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
 <script>
-  // GUN = dezentrale Echtzeit-Datenbank, kein Account nötig
-  const gun = GUN(['https://gun-manhattan.herokuapp.com/gun']);
-  const db = gun.get('dogwalk-jonna-theda-2024');
-
-  let walks = {};
-  let filter = 'all';
-  let archivFilter = 'all';
+  const STORAGE_A = 'dogwalk_jonna_v2';
+  const STORAGE_B = 'dogwalk_theda_v2';
+  let currentPerson = null;
+  let walks = [];
 
   document.getElementById('datum').value = new Date().toISOString().split('T')[0];
 
-  function name(p) { return p === 'A' ? 'Jonna' : 'Theda'; }
+  function storageKey() { return currentPerson === 'A' ? STORAGE_A : STORAGE_B; }
+  function personName() { return currentPerson === 'A' ? 'Jonna' : 'Theda'; }
 
-  // Daten live laden
-  setSync('Verbinde …');
-  db.map().on((data, id) => {
-    if (!data || id === '_') return;
-    if (data.deleted) {
-      delete walks[id];
-    } else {
-      walks[id] = data;
-    }
+  function selectPerson(p) {
+    currentPerson = p;
+    localStorage.setItem('dogwalk_current_person', p);
+    loadWalks();
+    document.getElementById('screen-person').style.display = 'none';
+    document.getElementById('screen-app').style.display = 'block';
+    document.getElementById('person-name').textContent = personName() + ' – Spaziergänge';
+  }
+
+  function switchPerson() {
+    document.getElementById('screen-app').style.display = 'none';
+    document.getElementById('screen-person').style.display = 'block';
+    document.getElementById('person-name').textContent = '';
+  }
+
+  function loadWalks() {
+    try {
+      walks = JSON.parse(localStorage.getItem(storageKey()) || '[]');
+    } catch(e) { walks = []; }
     render();
-    setSync('');
-  });
+  }
+
+  function save() {
+    localStorage.setItem(storageKey(), JSON.stringify(walks));
+  }
 
   function addWalk() {
-    const p = document.getElementById('person').value;
     const d = document.getElementById('datum').value;
     const n = document.getElementById('notiz').value.trim();
     if (!d) { alert('Bitte ein Datum wählen.'); return; }
-    const id = 'w' + Date.now();
-    const entry = { id, person: p, datum: d, notiz: n, paid: false };
-    db.get(id).put(entry);
+    walks.unshift({ id: Date.now(), datum: d, notiz: n, paid: false });
+    save();
+    render();
     document.getElementById('notiz').value = '';
     showToast('Spaziergang eingetragen ✓');
   }
 
   function togglePaid(id) {
-    const w = walks[id];
+    const w = walks.find(x => x.id === id);
     if (!w) return;
-    const updated = Object.assign({}, w, { paid: !w.paid });
-    db.get(id).put(updated);
-    if (updated.paid) showToast('Bezahlt – ins Archiv verschoben ✓');
+    w.paid = true;
+    save();
+    render();
+    showToast('Als bezahlt markiert ✓');
   }
 
   function formatDate(d) {
@@ -162,65 +173,46 @@
     return `${day}.${m}.${y}`;
   }
 
-  function setFilter(f) {
-    filter = f;
-    ['all','A','B'].forEach(x => document.getElementById('f-'+x).classList.toggle('active', x === f));
-    renderWalks();
-  }
-
-  function setArchivFilter(f) {
-    archivFilter = f;
-    ['all','A','B'].forEach(x => document.getElementById('af-'+x).classList.toggle('active', x === f));
-    renderArchiv();
-  }
-
   function render() { renderStats(); renderWalks(); renderArchiv(); }
 
-  function getList() {
-    return Object.values(walks).filter(w => w && w.datum).sort((a,b) => b.datum.localeCompare(a.datum));
-  }
-
   function renderStats() {
-    const all = getList();
-    document.getElementById('stat-offen').textContent = all.filter(w => !w.paid).length;
-    document.getElementById('stat-archiv').textContent = all.filter(w => w.paid).length;
+    document.getElementById('stat-offen').textContent = walks.filter(w => !w.paid).length;
+    document.getElementById('stat-archiv').textContent = walks.filter(w => w.paid).length;
   }
 
   function renderWalks() {
     const list = document.getElementById('walk-list');
-    let data = getList().filter(w => !w.paid);
-    if (filter !== 'all') data = data.filter(w => w.person === filter);
+    const data = walks.filter(w => !w.paid);
     if (!data.length) {
-      list.innerHTML = `<div class="empty"><div class="empty-icon">🐕</div><p>Keine offenen Spaziergänge${filter !== 'all' ? ' für ' + name(filter) : ''}</p></div>`;
+      list.innerHTML = '<div class="empty"><div class="empty-icon">🐕</div><p>Keine offenen Spaziergänge</p></div>';
       return;
     }
     list.innerHTML = data.map(w => `
       <div class="walk-item">
-        <div class="checkbox ${w.paid ? 'checked' : ''}" onclick="togglePaid('${w.id}')">
+        <div class="checkbox" onclick="togglePaid(${w.id})" title="Als bezahlt markieren">
           <svg width="13" height="10" viewBox="0 0 13 10" fill="none"><path d="M1 5l4 4L12 1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
         <div class="walk-info">
           <div class="walk-date">${formatDate(w.datum)}</div>
           <div class="walk-meta">${w.notiz || 'Kein Kommentar'}</div>
         </div>
-        <span class="person-badge ${w.person === 'A' ? 'badge-a' : 'badge-b'}">${name(w.person)}</span>
+        <span class="person-badge badge-a">${personName()}</span>
       </div>
     `).join('');
   }
 
   function renderArchiv() {
     const list = document.getElementById('archiv-list');
-    let data = getList().filter(w => w.paid);
-    if (archivFilter !== 'all') data = data.filter(w => w.person === archivFilter);
+    const data = walks.filter(w => w.paid);
     if (!data.length) {
-      list.innerHTML = `<div class="empty"><div class="empty-icon">📦</div><p>Noch nichts im Archiv${archivFilter !== 'all' ? ' für ' + name(archivFilter) : ''}</p></div>`;
+      list.innerHTML = '<div class="empty"><div class="empty-icon">📦</div><p>Noch nichts im Archiv</p></div>';
       return;
     }
     list.innerHTML = data.map(w => `
       <div class="archive-item">
         <div>
           <div class="archive-date">${formatDate(w.datum)}</div>
-          <div class="archive-meta">${name(w.person)}${w.notiz ? ' · ' + w.notiz : ''}</div>
+          <div class="archive-meta">${personName()}${w.notiz ? ' · ' + w.notiz : ''}</div>
         </div>
         <span>✅</span>
       </div>
@@ -235,10 +227,6 @@
     document.getElementById('tab-' + t).classList.add('active');
   }
 
-  function setSync(msg) {
-    document.getElementById('sync').textContent = msg;
-  }
-
   function showToast(msg) {
     const t = document.createElement('div');
     t.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#c2185b;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;z-index:999;opacity:0;transition:opacity 0.3s';
@@ -247,6 +235,10 @@
     setTimeout(() => t.style.opacity = 1, 10);
     setTimeout(() => { t.style.opacity = 0; setTimeout(() => t.remove(), 300); }, 2200);
   }
+
+  // Beim Start prüfen ob Person bereits gewählt
+  const saved = localStorage.getItem('dogwalk_current_person');
+  if (saved) selectPerson(saved);
 </script>
 </body>
 </html>
