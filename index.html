@@ -174,17 +174,19 @@
     try {
       const res = await fetch('https://api.jsonbin.io/v3/b', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY, 'X-Bin-Name': 'dogwalk' },
+        headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY, 'X-Bin-Name': 'dogwalk', 'X-Bin-Private': 'false' },
         body: JSON.stringify({ walks: [] })
       });
-      const data = await res.json();
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch(e) { alert('Antwort konnte nicht gelesen werden:\n' + text); return; }
       if (data.metadata && data.metadata.id) {
         BIN_ID = data.metadata.id;
         localStorage.setItem(BIN_KEY, BIN_ID);
         walks = [];
         render();
       } else {
-        alert('Fehler beim Erstellen. Bitte API-Key prüfen.');
+        alert('JSONBin Fehler:\n' + JSON.stringify(data));
       }
     } catch(e) { alert('Verbindungsfehler: ' + e.message); }
   }
